@@ -1,0 +1,12 @@
+Source: ros-noetic-cpr-robot-customizer
+Section: misc
+Priority: optional
+Maintainer: Joey Yang <jyang@clearpathrobotics.com>
+Build-Depends: debhelper (>= 9.0.0), ros-noetic-catkin, ros-noetic-roslaunch
+Homepage: 
+Standards-Version: 3.9.2
+
+Package: ros-noetic-cpr-robot-customizer
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, ros-noetic-gazebo-ros, ros-noetic-gazebo-ros-control, ros-noetic-joint-state-publisher, ros-noetic-microstrain-inertial-driver, ros-noetic-nmea-comms, ros-noetic-nmea-navsat-driver, ros-noetic-realsense2-camera, ros-noetic-realsense2-description, ros-noetic-robot-state-publisher, ros-noetic-rviz, ros-noetic-sick-scan, ros-noetic-urdf, ros-noetic-urg-node, ros-noetic-velodyne-description, ros-noetic-velodyne-pointcloud, ros-noetic-xacro
+Description: Repository for Clearpath Robotics' Robot Customizer ROS package.
