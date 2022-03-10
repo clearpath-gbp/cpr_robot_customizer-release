@@ -1,0 +1,119 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <material name="dark_grey"><color rgba="0.2 0.2 0.2 1.0" /></material>
+  <material name="black"><color rgba="0.15 0.15 0.15 1.0" /></material>
+
+  <!--
+    Add/remove a 2D lidar sensor by changing the CPR_LASER environment variable. The default model is the SICK LMS1xx, but this can be changed with the CPR_LASER_MODEL environment variable. Valid model designations are:
+    - lms1xx (default) :: SICK LMS1xx
+    - ust10            :: Hokuyo UST-10LX
+  -->
+  <xacro:if value="$(optenv CPR_LASER 0)">
+    <xacro:property name="lidar_model" value="$(optenv CPR_LASER_MODEL lms1xx)" />
+
+    <xacro:if value="${lidar_model == 'lms1xx'}">
+      <xacro:include filename="$(find sick_scan)/urdf/sick_lms1xx.urdf.xacro" />
+      
+      <xacro:sick_lms_1xx name="sick_lms1xx" ros_topic="$(optenv CPR_LASER_TOPIC scan)" />
+      
+      <joint name="$(optenv CPR_LASER_PARENT base_link)_sick_lms1xx_laser_joint" type="fixed">
+        <origin xyz="$(optenv CPR_LASER_XYZ 0 0 0)" rpy="$(optenv CPR_LASER_RPY 0 0 0)" />
+        <parent link="$(optenv CPR_LASER_PARENT base_link)" />
+        <child link="sick_lms1xx_mount_link" />
+      </joint>
+    </xacro:if>
+
+    <xacro:if value="${lidar_model == 'ust10'}">
+      <xacro:include filename="$(find urg_node)/urdf/hokuyo_ust10.urdf.xacro" />
+
+      <xacro:hokuyo_ust10_mount topic="$(optenv CPR_LASER_TOPIC scan)" prefix="hokuyo" parent_link="$(optenv CPR_LASER_PARENT base_link)">
+        <origin xyz="$(optenv CPR_LASER_XYZ 0 0 0)" rpy="$(optenv CPR_LASER_RPY 0 0 0)" />
+      </xacro:hokuyo_ust10_mount>
+    </xacro:if>
+  </xacro:if>
+
+  <!--
+    Add/remove a 3D lidar sensor by changing the CPR_LASER_3D environment variable. The default model is the Velodyne VLP16, but this can be changed with the CPR_LASER_3D_MODEL environment variable. Valid model designations are:
+    - vlp16 (default)  :: Velodyne VLP-16
+    - hdl32e           :: Velodyne HDL-32E
+  -->
+  <xacro:if value="$(optenv CPR_LASER_3D 0)">
+    <xacro:property name="lidar_3d_model" value="$(optenv CPR_LASER_3D_MODEL vlp16)" />
+
+    <xacro:if value="${lidar_3d_model == 'vlp16'}">
+      <xacro:include filename="$(find velodyne_description)/urdf/VLP-16.urdf.xacro" />
+
+      <xacro:VLP-16 parent="$(optenv CPR_LASER_3D_PARENT base_link)" topic="$(optenv CPR_LASER_3D_TOPIC points)">
+        <origin xyz="$(optenv CPR_LASER_3D_XYZ 0 0 0)" rpy="$(optenv CPR_LASER_3D_RPY 0 0 0)" />
+      </xacro:VLP-16>
+    </xacro:if>
+
+    <xacro:if value="${lidar_3d_model == 'hdl32e'}">
+      <xacro:include filename="$(find velodyne_description)/urdf/HDL-32E.urdf.xacro" />
+
+      <xacro:HDL-32E parent="$(optenv CPR_LASER_3D_PARENT base_link)" topic="$(optenv CPR_LASER_3D_TOPIC points)">
+        <origin xyz="$(optenv CPR_LASER_3D_XYZ 0 0 0)" rpy="$(optenv CPR_LASER_3D_RPY 0 0 0)" />
+      </xacro:HDL-32E>
+    </xacro:if>
+  </xacro:if>
+
+  <!--
+    Add/remove a serial GNSS/GPS sensor by changing the CPR_GPS environment variable. The default model is the Novatel SMART7, but this can be changed with the CPR_GPS_MODEL environment variable. Valid model designations are:
+    - smart7 (default)  :: Novatel SMART7
+    - 18x               :: Garmin 18x
+  -->
+  <xacro:if value="$(optenv CPR_GPS 0)">
+    <xacro:property name="gps_model" value="$(optenv CPR_GPS_MODEL smart7)" />
+
+    <xacro:if value="${gps_model == 'smart7'}">
+      <xacro:include filename="$(find cpr_robot_customizer)/urdf/accessories/gps/novatel_smart7.urdf.xacro" />
+
+      <xacro:novatel_smart7 />
+    </xacro:if>
+
+    <xacro:if value="${gps_model == '18x'}">
+      <xacro:include filename="$(find cpr_robot_customizer)/urdf/accessories/gps/garmin_18x.urdf.xacro" />
+
+      <xacro:garmin_18x />
+    </xacro:if>
+
+    <joint name="$(optenv CPR_GPS_PARENT base_link)_gps_link_joint" type="fixed">
+      <origin xyz="$(optenv CPR_GPS_XYZ 0 0 0)" rpy="$(optenv CPR_GPS_RPY 0 0 0)" />
+      <parent link="$(optenv CPR_GPS_PARENT base_link)" />
+      <child link="gps_link" />
+    </joint>
+  </xacro:if>
+
+  <!--
+    Add/remove an IMU sensor by changing the CPR_MICROSTRAIN environment variable. This supports the LORD MicroStrain GX3, GX4, GX5, CX5, RQ1 and GQ7 series IMU sensors.
+  -->
+  <xacro:if value="$(optenv CPR_MICROSTRAIN 0)">
+    <xacro:include filename="$(find cpr_robot_customizer)/urdf/accessories/imu/microstrain.urdf.xacro" />
+
+    <xacro:microstrain />
+
+    <joint name="$(optenv CPR_MICROSTRAIN_PARENT base_link)_microstrain_link_joint" type="fixed">
+      <origin xyz="$(optenv CPR_MICROSTRAIN_XYZ 0 0 0)" rpy="$(optenv CPR_MICROSTRAIN_RPY 0 0 0)" />
+      <parent link="$(optenv CPR_MICROSTRAIN_PARENT base_link)" />
+      <child link="microstrain_link" />
+    </joint>
+  </xacro:if>
+
+  <!--
+    Add/remove an Intel RealSense family camera by changing the CPR_REALSENSE environment variable. The default model is the D435, but can be changed with the
+    CPR_REALSENSE_MODEL environment variable. Valid model designations are:
+    - d435 (default)
+    - d435i
+    - d415
+    - d455
+    - l515
+  -->
+  <xacro:if value="$(optenv CPR_REALSENSE 0)">
+    <xacro:include filename="$(find cpr_robot_customizer)/urdf/accessories/camera/intel_realsense.urdf.xacro" />
+    <xacro:realsense_sensor rs_model="$(optenv CPR_REALSENSE_MODEL d435)"
+                            prefix="$(optenv CPR_REALSENSE_PARENT base_link)"
+                            topic="$(optenv CPR_REALSENSE_TOPIC realsense)" />
+  </xacro:if>
+
+</robot>
